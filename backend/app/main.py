@@ -3,17 +3,26 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.addons.loader import load_bundled_addons
+from app.addons.seeder import seed_addons_for_all_users
 from app.config import get_settings
-from app.routers import auth
+from app.database import AsyncSessionLocal
+from app.routers import addons, auth
 
 settings = get_settings()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: addon registry will be initialized here in Step 3
+    # 1. Scan backend/addons/*/ and register bundled addon implementations
+    load_bundled_addons()
+
+    # 2. Ensure every existing user has an installation row for every bundled addon
+    async with AsyncSessionLocal() as db:
+        await seed_addons_for_all_users(db)
+
     yield
-    # Shutdown
+    # Shutdown (nothing to clean up for now)
 
 
 app = FastAPI(
@@ -31,6 +40,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(addons.router)
 
 
 @app.get("/health")

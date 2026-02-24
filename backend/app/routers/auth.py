@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.addons.seeder import seed_addons_for_user
 from app.config import get_settings
 from app.database import get_db
 from app.dependencies import get_current_user
@@ -53,6 +54,9 @@ async def register(
         user = await auth_service.create_user(db, data.email, data.password)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+    # Install all currently registered bundled addons for the new user
+    await seed_addons_for_user(db, user.id)
 
     access_token, refresh_token = await auth_service.create_auth_tokens(db, user.id)
     _set_auth_cookies(response, access_token, refresh_token)
