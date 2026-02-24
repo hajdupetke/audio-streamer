@@ -50,11 +50,14 @@ class StreamResult:
     """
     Resolved stream info returned by StreamResolver.resolve().
 
-    proxy=False → backend issues an HTTP redirect to `url` (direct sources like LibriVox)
-    proxy=True  → backend proxies the bytes with Range support (local files, auth-gated sources)
+    Three dispatch modes, checked in order by the stream endpoint:
+      1. local_path is set → serve the file directly from disk (FileResponse + Range)
+      2. proxy=True        → proxy bytes from `url` with Range header passthrough
+      3. proxy=False       → HTTP redirect to `url` (cheapest; works for public URLs)
     """
-    url: str
+    url: str = ""                    # redirect/proxy target; empty string for local-file mode
     proxy: bool = False
+    local_path: str | None = None    # absolute server path; triggers direct file serving
     headers: dict[str, str] = field(default_factory=dict)
     content_type: str = "audio/mpeg"
 
