@@ -116,3 +116,13 @@ async def refresh(
 @router.get("/me", response_model=UserResponse)
 async def get_me(current_user: User = Depends(get_current_user)) -> UserResponse:
     return UserResponse.model_validate(current_user)
+
+
+@router.get("/token")
+async def get_token(request: Request) -> dict:
+    """Return the current access token value so the frontend can build ?token= stream URLs."""
+    token = request.cookies.get("access_token")
+    if not token:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return {"access_token": token}

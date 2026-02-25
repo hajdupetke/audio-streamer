@@ -7,7 +7,7 @@ from app.addons.loader import load_bundled_addons
 from app.addons.seeder import seed_addons_for_all_users
 from app.config import get_settings
 from app.database import AsyncSessionLocal
-from app.routers import addons, auth
+from app.routers import addons, auth, library, progress, search, stream
 
 settings = get_settings()
 
@@ -41,6 +41,10 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(addons.router)
+app.include_router(library.router)
+app.include_router(progress.router)
+app.include_router(search.router)
+app.include_router(stream.router)
 
 
 @app.get("/health")
