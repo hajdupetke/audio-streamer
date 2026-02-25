@@ -30,8 +30,8 @@ function LoginPage() {
     try {
       await api.auth.login(email, password);
       navigate({ to: '/search' });
-    } catch {
-      toast.error('Invalid email or password');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Login failed');
     } finally {
       setIsLoading(false);
     }

@@ -30,8 +30,8 @@ function RegisterPage() {
     try {
       await api.auth.register(email, password);
       navigate({ to: '/search' });
-    } catch {
-      toast.error('Registration failed. The email may already be in use.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Registration failed');
     } finally {
       setIsLoading(false);
     }

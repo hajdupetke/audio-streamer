@@ -4,8 +4,8 @@ import secrets
 import uuid
 from datetime import UTC, datetime, timedelta
 
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,7 +14,6 @@ from app.models.refresh_token import RefreshToken
 from app.models.user import User
 
 settings = get_settings()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -59,7 +58,8 @@ async def create_user(db: AsyncSession, email: str, password: str) -> User:
     existing = await get_user_by_email(db, email)
     if existing:
         raise ValueError("Email already registered")
-    user = User(email=email, hashed_password=pwd_context.hash(password))
+    hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    user = User(email=email, hashed_password=hashed)
     db.add(user)
     await db.commit()
     await db.refresh(user)
@@ -69,7 +69,7 @@ async def create_user(db: AsyncSession, email: str, password: str) -> User:
 async def authenticate_user(db: AsyncSession, email: str, password: str) -> User:
     """Verify credentials. Raises ValueError on failure (intentionally vague message)."""
     user = await get_user_by_email(db, email)
-    if not user or not pwd_context.verify(password, user.hashed_password):
+    if not user or not bcrypt.checkpw(password.encode(), user.hashed_password.encode()):
         raise ValueError("Invalid email or password")
     return user
 
