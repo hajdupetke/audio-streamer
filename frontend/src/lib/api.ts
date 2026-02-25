@@ -11,7 +11,7 @@ import type {
   AddonSettings,
 } from "@/types"
 
-const API = "http://localhost:8000"
+const API = ""  // same-origin: Vite proxy in dev, nginx proxy in production
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API}${path}`, {
