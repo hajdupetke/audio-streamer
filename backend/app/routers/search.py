@@ -3,7 +3,6 @@ import asyncio
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.addons.registry import registry
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.user import User
@@ -31,15 +30,16 @@ async def search(
         addon_ids = [addon_id]
         sources = [source]
     else:
-        # Gather all enabled addons that have content_source capability
+        # Gather all enabled addons (bundled + remote) that have content_source capability
         addon_ids = []
         sources = []
-        for aid, manifest in registry.all_manifests.items():
-            if "content_source" not in manifest.capabilities:
+        all_installations = await addon_service.get_all_installed_addons(db, current_user.id)
+        for installation in all_installations:
+            if not installation.enabled:
                 continue
-            source = await addon_service.get_content_source(db, current_user.id, aid)
+            source = await addon_service.get_content_source(db, current_user.id, installation.addon_id)
             if source is not None:
-                addon_ids.append(aid)
+                addon_ids.append(installation.addon_id)
                 sources.append(source)
 
     if not sources:

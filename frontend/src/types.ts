@@ -103,6 +103,9 @@ export interface Addon {
   settings_schema: SettingsField[]
   enabled: boolean
   configured: boolean
+  is_remote: boolean
+  author: string | null
+  icon_url: string | null
 }
 
 export interface AddonSettings {

@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+import httpx
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -9,6 +10,7 @@ from app.schemas.addon import (
     AddonResponse,
     AddonSettingsRequest,
     AddonSettingsResponse,
+    InstallAddonRequest,
 )
 from app.services import addon as addon_service
 
@@ -23,6 +25,35 @@ async def list_addons(
     """List all installed addons for the current user with their enabled state."""
     rows = await addon_service.get_user_addons_response(db, current_user.id)
     return [AddonResponse(**r) for r in rows]
+
+
+@router.post("/install", status_code=status.HTTP_201_CREATED)
+async def install_addon(
+    body: InstallAddonRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Install a remote addon from a manifest URL."""
+    try:
+        await addon_service.install_remote_addon(db, current_user.id, body.manifest_url)
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"Failed to fetch remote manifest: {e}")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"ok": True}
+
+
+@router.delete("/{addon_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def uninstall_addon(
+    addon_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    """Uninstall a remote addon and remove its settings."""
+    try:
+        await addon_service.uninstall_remote_addon(db, current_user.id, addon_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.patch("/{addon_id}")

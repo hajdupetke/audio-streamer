@@ -39,3 +39,23 @@ export function useSaveAddonSettings(id: string) {
     },
   })
 }
+
+export function useInstallAddon() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (manifestUrl: string) => api.addons.install(manifestUrl),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["addons"] })
+    },
+  })
+}
+
+export function useUninstallAddon() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.addons.uninstall(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["addons"] })
+    },
+  })
+}

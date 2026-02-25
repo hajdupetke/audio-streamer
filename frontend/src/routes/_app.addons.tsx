@@ -1,7 +1,9 @@
 import { useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
-import { useAddons, useToggleAddon } from "@/hooks/useAddons"
+import { toast } from "sonner"
+import { useAddons, useToggleAddon, useUninstallAddon } from "@/hooks/useAddons"
 import { AddonSettingsForm } from "@/components/AddonSettingsForm"
+import { InstallAddonDialog } from "@/components/InstallAddonDialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,7 +19,9 @@ export const Route = createFileRoute("/_app/addons")({
 function AddonsPage() {
   const { data: addons, isLoading } = useAddons()
   const toggleAddon = useToggleAddon()
+  const uninstallAddon = useUninstallAddon()
   const [settingsOpen, setSettingsOpen] = useState<string | null>(null)
+  const [installOpen, setInstallOpen] = useState(false)
 
   const selectedAddon = addons?.find((a) => a.id === settingsOpen) ?? null
 
@@ -25,9 +29,24 @@ function AddonsPage() {
     toggleAddon.mutate({ id: addon.id, enabled: !addon.enabled })
   }
 
+  async function handleUninstall(addon: Addon) {
+    if (!window.confirm(`Uninstall "${addon.name}"? This will also delete your saved settings for this addon.`)) {
+      return
+    }
+    try {
+      await uninstallAddon.mutateAsync(addon.id)
+      toast.success(`${addon.name} uninstalled`)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to uninstall addon")
+    }
+  }
+
   return (
     <div className="container mx-auto px-6 py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold tracking-tight mb-2">Addons</h1>
+      <div className="flex items-center justify-between mb-2">
+        <h1 className="text-3xl font-bold tracking-tight">Addons</h1>
+        <Button onClick={() => setInstallOpen(true)}>Install Addon</Button>
+      </div>
       <p className="text-sm text-muted-foreground mb-6">Manage your content sources and stream resolvers</p>
 
       {isLoading && (
@@ -63,6 +82,11 @@ function AddonsPage() {
                           Configured
                         </Badge>
                       )}
+                      {addon.is_remote && (
+                        <Badge variant="outline" className="text-xs">
+                          Remote
+                        </Badge>
+                      )}
                     </CardTitle>
                     <CardDescription>{addon.description}</CardDescription>
                   </div>
@@ -79,6 +103,16 @@ function AddonsPage() {
                         onClick={() => setSettingsOpen(addon.id)}
                       >
                         Settings
+                      </Button>
+                    )}
+                    {addon.is_remote && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleUninstall(addon)}
+                        disabled={uninstallAddon.isPending}
+                      >
+                        Uninstall
                       </Button>
                     )}
                   </div>
@@ -126,6 +160,8 @@ function AddonsPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <InstallAddonDialog open={installOpen} onOpenChange={setInstallOpen} />
     </div>
   )
 }

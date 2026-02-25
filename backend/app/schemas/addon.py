@@ -22,6 +22,9 @@ class AddonResponse(BaseModel):
     settings_schema: list[SettingsFieldSchema]
     enabled: bool
     configured: bool  # True when all required settings are saved
+    is_remote: bool = False
+    author: str | None = None
+    icon_url: str | None = None
 
 
 class AddonSettingsResponse(BaseModel):
@@ -36,3 +39,7 @@ class AddonSettingsRequest(BaseModel):
 
 class AddonEnabledRequest(BaseModel):
     enabled: bool
+
+
+class InstallAddonRequest(BaseModel):
+    manifest_url: str

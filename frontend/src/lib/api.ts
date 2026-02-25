@@ -105,6 +105,13 @@ export const api = {
         method: "PUT",
         body: JSON.stringify({ settings }),
       }),
+    install: (manifestUrl: string) =>
+      request<{ ok: boolean }>("/api/addons/install", {
+        method: "POST",
+        body: JSON.stringify({ manifest_url: manifestUrl }),
+      }),
+    uninstall: (id: string) =>
+      request<void>(`/api/addons/${id}`, { method: "DELETE" }),
   },
 
   stream: {
