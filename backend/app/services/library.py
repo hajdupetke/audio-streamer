@@ -36,16 +36,16 @@ async def save_book(
             title=title,
             author=author,
             cover_url=cover_url,
-            metadata=metadata,
+            extra_metadata=metadata,
         )
         .on_conflict_do_update(
             index_elements=["user_id", "addon_id", "external_id"],
-            set_=dict(
-                title=title,
-                author=author,
-                cover_url=cover_url,
-                metadata=metadata,
-            ),
+            set_={
+                "title": title,
+                "author": author,
+                "cover_url": cover_url,
+                LibraryItem.__table__.c["metadata"]: metadata,
+            },
         )
         .returning(LibraryItem)
     )

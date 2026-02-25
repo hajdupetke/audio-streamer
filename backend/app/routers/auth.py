@@ -9,7 +9,7 @@ from app.models.user import User
 from app.schemas.auth import LoginRequest, RegisterRequest, UserResponse
 from app.services import auth as auth_service
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/api/auth", tags=["auth"])
 settings = get_settings()
 
 
