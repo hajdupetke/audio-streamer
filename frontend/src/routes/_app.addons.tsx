@@ -1,0 +1,123 @@
+import { useState } from "react"
+import { createFileRoute } from "@tanstack/react-router"
+import { useAddons, useToggleAddon } from "@/hooks/useAddons"
+import { AddonSettingsForm } from "@/components/AddonSettingsForm"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Switch } from "@/components/ui/switch"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Skeleton } from "@/components/ui/skeleton"
+import type { Addon } from "@/types"
+
+export const Route = createFileRoute("/_app/addons")({
+  component: AddonsPage,
+})
+
+function AddonsPage() {
+  const { data: addons, isLoading } = useAddons()
+  const toggleAddon = useToggleAddon()
+  const [settingsOpen, setSettingsOpen] = useState<string | null>(null)
+
+  const selectedAddon = addons?.find((a) => a.id === settingsOpen) ?? null
+
+  function handleToggle(addon: Addon) {
+    toggleAddon.mutate({ id: addon.id, enabled: !addon.enabled })
+  }
+
+  return (
+    <div className="container mx-auto px-6 py-8 max-w-4xl">
+      <h1 className="text-2xl font-bold mb-6">Addons</h1>
+
+      {isLoading && (
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-4 w-64" />
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {!isLoading && addons && (
+        <div className="space-y-4">
+          {addons.map((addon) => (
+            <Card key={addon.id}>
+              <CardHeader>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      {addon.name}
+                      <span className="text-xs font-normal text-muted-foreground">
+                        v{addon.version}
+                      </span>
+                      {addon.configured && (
+                        <Badge variant="secondary" className="text-xs">
+                          Configured
+                        </Badge>
+                      )}
+                    </CardTitle>
+                    <CardDescription>{addon.description}</CardDescription>
+                  </div>
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <Switch
+                      checked={addon.enabled}
+                      onCheckedChange={() => handleToggle(addon)}
+                      disabled={toggleAddon.isPending}
+                    />
+                    {addon.settings_schema.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSettingsOpen(addon.id)}
+                      >
+                        Settings
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardHeader>
+              {addon.capabilities.length > 0 && (
+                <CardContent className="pt-0">
+                  <div className="flex flex-wrap gap-1.5">
+                    {addon.capabilities.map((cap) => (
+                      <Badge key={cap} variant="outline" className="text-xs">
+                        {cap}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {!isLoading && addons && addons.length === 0 && (
+        <div className="text-center py-16 text-muted-foreground">
+          No addons available
+        </div>
+      )}
+
+      <Dialog open={!!settingsOpen} onOpenChange={(open) => !open && setSettingsOpen(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {selectedAddon ? `${selectedAddon.name} Settings` : "Settings"}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedAddon && (
+            <AddonSettingsForm
+              addonId={selectedAddon.id}
+              schema={selectedAddon.settings_schema}
+              onClose={() => setSettingsOpen(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
