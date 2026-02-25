@@ -1,8 +1,28 @@
 import json
 from functools import lru_cache
+from typing import Any
 
-from pydantic import field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, EnvSettingsSource, PydanticBaseSettingsSource, SettingsConfigDict
+
+
+def _parse_cors(v: Any) -> list[str]:
+    """Parse CORS origins from a string (JSON array or comma-separated) or list."""
+    if isinstance(v, list):
+        return v
+    if not isinstance(v, str):
+        return list(v)
+    v = v.strip()
+    # Try valid JSON first: ["http://...","http://..."]
+    try:
+        result = json.loads(v)
+        if isinstance(result, list):
+            return result
+    except json.JSONDecodeError:
+        pass
+    # Fallback: uv --env-file strips inner quotes → [http://...,http://...]
+    if v.startswith("[") and v.endswith("]"):
+        v = v[1:-1]
+    return [origin.strip() for origin in v.split(",") if origin.strip()]
 
 
 class Settings(BaseSettings):
@@ -33,15 +53,23 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    @field_validator("cors_origins", mode="before")
     @classmethod
-    def parse_cors_origins(cls, v: str | list) -> list[str]:
-        if isinstance(v, str):
-            try:
-                return json.loads(v)
-            except json.JSONDecodeError:
-                return [origin.strip() for origin in v.split(",")]
-        return v
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        **kwargs: Any,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        class SafeEnvSource(EnvSettingsSource):
+            """Handles CORS_ORIGINS regardless of how the shell quotes the JSON array."""
+            def decode_complex_value(self, field_name: str, field: Any, value: Any) -> Any:
+                if field_name == "cors_origins":
+                    return _parse_cors(value)
+                return super().decode_complex_value(field_name, field, value)
+
+        return (init_settings, SafeEnvSource(settings_cls), dotenv_settings, *kwargs.values())
 
 
 @lru_cache
