@@ -38,7 +38,8 @@ function SearchPage() {
 
   return (
     <div className="container mx-auto px-6 py-8 max-w-7xl">
-      <h1 className="text-2xl font-bold mb-6">Search Audiobooks</h1>
+      <h1 className="text-3xl font-bold tracking-tight mb-2">Search Audiobooks</h1>
+      <p className="text-sm text-muted-foreground mb-6">Find your next listen across all connected sources</p>
 
       <form onSubmit={handleSearch} className="flex gap-3 mb-6">
         <Input
@@ -69,12 +70,13 @@ function SearchPage() {
 
       {query && data && (
         <p className="text-sm text-muted-foreground mb-4">
-          {data.results.length} result{data.results.length !== 1 ? "s" : ""} for &ldquo;{data.query}&rdquo;
+          <span className="text-primary font-medium">{data.results.length}</span>{" "}
+          result{data.results.length !== 1 ? "s" : ""} for &ldquo;{data.query}&rdquo;
         </p>
       )}
 
       {data && data.results.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 animate-in fade-in duration-300">
           {data.results.map((book) => (
             <BookCard
               key={`${book.addon_id}-${book.id}`}
@@ -91,14 +93,20 @@ function SearchPage() {
       )}
 
       {query && data && data.results.length === 0 && !isFetching && (
-        <div className="text-center py-16 text-muted-foreground">
-          No results found for &ldquo;{data.query}&rdquo;
+        <div className="text-center py-16 flex flex-col items-center gap-4">
+          <svg className="h-16 w-16 text-primary/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <p className="text-muted-foreground">No results found for &ldquo;{data.query}&rdquo;</p>
         </div>
       )}
 
       {!query && (
-        <div className="text-center py-16 text-muted-foreground">
-          Enter a search query to find audiobooks
+        <div className="text-center py-16 flex flex-col items-center gap-4">
+          <svg className="h-16 w-16 text-primary/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <p className="text-muted-foreground">Enter a search query to find audiobooks</p>
         </div>
       )}
     </div>

@@ -27,7 +27,8 @@ function AddonsPage() {
 
   return (
     <div className="container mx-auto px-6 py-8 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-6">Addons</h1>
+      <h1 className="text-3xl font-bold tracking-tight mb-2">Addons</h1>
+      <p className="text-sm text-muted-foreground mb-6">Manage your content sources and stream resolvers</p>
 
       {isLoading && (
         <div className="space-y-4">
@@ -45,7 +46,10 @@ function AddonsPage() {
       {!isLoading && addons && (
         <div className="space-y-4">
           {addons.map((addon) => (
-            <Card key={addon.id}>
+            <Card
+              key={addon.id}
+              className={`hover:border-primary/30 transition-colors ${addon.enabled ? "border-l-2 border-l-primary" : ""}`}
+            >
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1 flex-1 min-w-0">
@@ -55,7 +59,7 @@ function AddonsPage() {
                         v{addon.version}
                       </span>
                       {addon.configured && (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge className="text-xs bg-primary/15 text-primary border border-primary/20 hover:bg-primary/20">
                           Configured
                         </Badge>
                       )}
@@ -84,7 +88,11 @@ function AddonsPage() {
                 <CardContent className="pt-0">
                   <div className="flex flex-wrap gap-1.5">
                     {addon.capabilities.map((cap) => (
-                      <Badge key={cap} variant="outline" className="text-xs">
+                      <Badge
+                        key={cap}
+                        variant="outline"
+                        className="text-xs border-primary/30 text-primary/80"
+                      >
                         {cap}
                       </Badge>
                     ))}

@@ -5,6 +5,7 @@ interface PlayerStore {
   addonId: string | null
   itemId: string | null
   itemTitle: string | null
+  coverUrl: string | null
   files: ChapterFile[]
   currentIndex: number
   isPlaying: boolean
@@ -18,6 +19,7 @@ interface PlayerStore {
     title: string,
     files: ChapterFile[],
     libraryItemId: string | null,
+    coverUrl: string | null,
     startIndex?: number
   ): void
   setCurrentIndex(i: number): void
@@ -32,6 +34,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   addonId: null,
   itemId: null,
   itemTitle: null,
+  coverUrl: null,
   files: [],
   currentIndex: 0,
   isPlaying: false,
@@ -39,11 +42,12 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   duration: 0,
   libraryItemId: null,
 
-  loadBook(addonId, itemId, title, files, libraryItemId, startIndex = 0) {
+  loadBook(addonId, itemId, title, files, libraryItemId, coverUrl, startIndex = 0) {
     set({
       addonId,
       itemId,
       itemTitle: title,
+      coverUrl,
       files,
       currentIndex: startIndex,
       isPlaying: true,

@@ -88,7 +88,7 @@ function BookDetailPage() {
       }
     }
 
-    loadBook(addonId, itemId, book.title, book.files as ChapterFile[], libItemId, index)
+    loadBook(addonId, itemId, book.title, book.files as ChapterFile[], libItemId, book.cover_url ?? null, index)
   }
 
   if (bookLoading || libraryLoading) {
@@ -119,7 +119,7 @@ function BookDetailPage() {
   }
 
   return (
-    <div className="container mx-auto px-6 py-8 max-w-6xl">
+    <div className="container mx-auto px-6 py-8 max-w-6xl animate-in fade-in duration-300">
       <div className="flex gap-8 mb-8">
         {/* Left: Cover + metadata */}
         <div className="flex-shrink-0 w-56 space-y-4">
@@ -127,10 +127,10 @@ function BookDetailPage() {
             <img
               src={book.cover_url}
               alt={book.title}
-              className="w-full rounded-lg object-cover shadow-lg"
+              className="w-full rounded-lg object-cover shadow-2xl ring-1 ring-white/10"
             />
           ) : (
-            <div className="w-full aspect-square rounded-lg bg-muted flex items-center justify-center">
+            <div className="w-full aspect-square rounded-lg bg-gradient-to-br from-secondary to-muted flex items-center justify-center shadow-2xl ring-1 ring-white/10">
               <svg
                 className="w-16 h-16 text-muted-foreground"
                 fill="none"
@@ -146,7 +146,7 @@ function BookDetailPage() {
               </svg>
             </div>
           )}
-          <Badge variant="secondary">{addonId}</Badge>
+          <Badge className="bg-primary/15 text-primary border border-primary/20 hover:bg-primary/20">{addonId}</Badge>
         </div>
 
         {/* Right: Info + actions */}
@@ -168,7 +168,7 @@ function BookDetailPage() {
                 </Button>
               ) : (
                 <Button
-                  variant="outline"
+                  variant="default"
                   size="sm"
                   onClick={handleSave}
                   disabled={saveBook.isPending}
@@ -201,7 +201,7 @@ function BookDetailPage() {
             {book.files.map((file, index) => (
               <div
                 key={file.id}
-                className="flex items-center gap-4 px-3 py-2.5 rounded-md hover:bg-muted/50 group"
+                className="flex items-center gap-4 px-3 py-2.5 rounded-md hover:bg-primary/10 group transition-colors"
               >
                 <span className="text-xs text-muted-foreground w-6 text-right flex-shrink-0">
                   {file.track_number}
@@ -215,7 +215,7 @@ function BookDetailPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 hover:text-primary"
                   onClick={() => handlePlayTrack(index)}
                 >
                   <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">

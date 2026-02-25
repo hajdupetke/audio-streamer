@@ -10,9 +10,9 @@ export function BookCard({ book, onClick }: BookCardProps) {
   return (
     <div
       onClick={onClick}
-      className="cursor-pointer group rounded-lg overflow-hidden bg-card border border-border hover:border-primary/50 transition-all hover:shadow-lg"
+      className="cursor-pointer group rounded-lg overflow-hidden bg-card border border-border hover:border-primary/60 transition-all hover:shadow-xl hover:shadow-primary/10"
     >
-      <div className="aspect-square bg-muted relative overflow-hidden">
+      <div className="aspect-square relative overflow-hidden">
         {book.cover_url ? (
           <img
             src={book.cover_url}
@@ -20,7 +20,7 @@ export function BookCard({ book, onClick }: BookCardProps) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-muted">
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-secondary to-muted">
             <svg
               className="w-16 h-16 text-muted-foreground"
               fill="none"
@@ -42,7 +42,7 @@ export function BookCard({ book, onClick }: BookCardProps) {
           {book.title}
         </p>
         <p className="text-xs text-muted-foreground line-clamp-1">{book.author}</p>
-        <Badge variant="secondary" className="text-xs mt-1">
+        <Badge className="text-xs mt-1 bg-primary/15 text-primary border border-primary/20 hover:bg-primary/20">
           {book.addon_id}
         </Badge>
       </div>

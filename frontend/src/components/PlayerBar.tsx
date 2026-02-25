@@ -19,6 +19,7 @@ export function PlayerBar() {
     addonId,
     itemId,
     itemTitle,
+    coverUrl,
     files,
     currentIndex,
     isPlaying,
@@ -98,14 +99,39 @@ export function PlayerBar() {
     setPlaying(!isPlaying)
   }
 
+  const progressPercent = duration > 0 ? (position / duration) * 100 : 0
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-24 bg-card border-t border-border flex items-center px-6 gap-6 z-50">
-      {/* Left: book + chapter info */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-foreground truncate">{itemTitle}</p>
-        <p className="text-xs text-muted-foreground truncate">
-          {currentFile?.title ?? ""}
-        </p>
+    <div className="fixed bottom-0 left-0 right-0 h-24 bg-card/80 backdrop-blur-md border-t border-border flex items-center px-6 gap-6 z-50 animate-in slide-in-from-bottom-2 duration-300">
+      {/* Indigo progress bar at top edge */}
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-border">
+        <div
+          className="h-full bg-primary transition-all duration-100"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+
+      {/* Left: cover art + book/chapter info */}
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        {coverUrl ? (
+          <img
+            src={coverUrl}
+            alt={itemTitle ?? ""}
+            className="h-10 w-10 rounded object-cover flex-shrink-0"
+          />
+        ) : (
+          <div className="h-10 w-10 rounded bg-gradient-to-br from-secondary to-muted flex-shrink-0 flex items-center justify-center">
+            <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+            </svg>
+          </div>
+        )}
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-foreground truncate">{itemTitle}</p>
+          <p className="text-xs text-muted-foreground truncate">
+            {currentFile?.title ?? ""}
+          </p>
+        </div>
       </div>
 
       {/* Center: controls + scrubber */}

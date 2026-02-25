@@ -34,7 +34,9 @@ function AppLayout() {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-1 pb-24">
-        <Outlet />
+        <div className="animate-in fade-in duration-300">
+          <Outlet />
+        </div>
       </main>
       <PlayerBar />
     </div>
